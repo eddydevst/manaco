@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
-  private base = environment.apiUrl;
+  private base = environment.apiUrl.replace(/\/+$/, '');
 
   private params(p?: Record<string, any>): HttpParams {
     let hp = new HttpParams();
