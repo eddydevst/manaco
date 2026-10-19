@@ -19,7 +19,11 @@ JWT_SECRET = os.getenv("JWT_SECRET", "cambia-esta-clave-en-produccion")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "480"))
 
-CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "https://manaco-zt5s.onrender.com/").split(",") if o.strip()]
+CORS_ORIGINS = [
+    o.strip().rstrip("/")
+    for o in os.getenv("CORS_ORIGINS", "http://localhost:4200").split(",")
+    if o.strip()
+]
 
 # Días sin ventas para considerar un SKU de baja rotación (configurable por consulta)
 DIAS_BAJA_ROTACION = int(os.getenv("DIAS_BAJA_ROTACION", "120"))
