@@ -161,3 +161,24 @@ manaco/
 | El frontend dice “No se pudo conectar con la API” | Inicia el backend (`uvicorn app.main:app --reload`) y revisa `apiUrl` en `environment.ts`. |
 | Error de CORS en el navegador | Agrega la dirección del frontend en `CORS_ORIGINS` del `.env` y reinicia la API. |
 | `npm install` falla | Usa Node 20 LTS (`node -v`). |
+
+## Dashboard de comercio exterior (Excel)
+
+La ruta `/comercio-exterior` utiliza `GET /api/comex/mercado`, protegido por el permiso existente `comex.ver`. Mantiene Angular, FastAPI y los gráficos SVG del proyecto. La fuente externa se procesa por separado de las operaciones internas y de las cargas históricas de `/api/comex`; no requiere migraciones ni cargar estadísticas en tablas de ventas o compras.
+
+La copia incluida en `backend/data/comercio_exterior.xlsx` corresponde al archivo entregado **Bae de Datos MANACO - INTERMEDIO (1).xlsx**, sin alterar sus celdas. SHA256: `ACCFC43733D8B623DC1ED58F3949C9FA5F0530D862EB0FF086309734886E7DD4`. Contiene estadísticas reportadas por España, no por Bolivia ni por MANACO. El nombre del archivo no constituye una verificación independiente de su procedencia estadística.
+
+Para utilizar una versión nueva, sustituir esta copia o definir `COMEX_ARCHIVO` en `backend/.env` con la ruta del Excel y reiniciar el backend. El archivo se relee en cada consulta; filtros y gráficos se actualizan desde esa fuente. Se procesan todas las hojas con las columnas requeridas; se requieren valores numéricos calculados en las celdas (openpyxl no ejecuta fórmulas). No se añaden datos de demostración.
+
+Reglas de cálculo:
+
+- Intervalo del dashboard: 2020–2024. Filtros simultáneos por año, socio, categoría y flujo.
+- USD: columna `Valor_USD`; no se suma `Valor_miles_USD` ni se promedian valores unitarios precalculados.
+- Valor comercial ponderado: suma de USD / suma de pares, separada por categoría y flujo, usando filas con pares positivos. Cero pares devuelve un valor unitario no disponible; el valor comercial se conserva en los totales.
+- Saldo: exportaciones menos importaciones. Mayor/menor movimiento: suma de pares importados y exportados de las categorías presentes en la selección. Los empates se ordenan alfabéticamente.
+- Duplicados exactos: se conserva una fila. Claves repetidas (reportante, socio, año, flujo, SA6) con datos distintos: todas las filas involucradas quedan fuera de los indicadores hasta revisión. Las incidencias muestran hoja y fila originales.
+- Mundo/World/Total se conserva aparte y no se suma a los países. Los ceros de series temporales significan ausencia de registros válidos en la selección, no ausencia demostrada de comercio.
+
+La fuente entregada tiene 240 filas, sin nulos ni duplicados exactos, y 20 filas con 10 claves conflictivas. Con la política anterior, se calculan indicadores sobre 220 filas. El informe de calidad se refiere siempre a la fuente completa, independientemente de los filtros.
+
+Validación desde la raíz: `python -m unittest backend.tests.test_comercio_exterior -v`. Compilación del frontend: `cd frontend` y `npm run build` (`npm.cmd run build` en Windows con restricciones de scripts PowerShell).

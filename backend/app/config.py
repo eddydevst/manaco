@@ -27,3 +27,6 @@ CORS_ORIGINS = [
 
 # Días sin ventas para considerar un SKU de baja rotación (configurable por consulta)
 DIAS_BAJA_ROTACION = int(os.getenv("DIAS_BAJA_ROTACION", "120"))
+
+# Fuente externa; no se mezcla con operaciones internas ni con cargas CSV.
+COMEX_ARCHIVO = Path(os.getenv("COMEX_ARCHIVO", str(Path(__file__).resolve().parent.parent / "data" / "comercio_exterior.xlsx")))

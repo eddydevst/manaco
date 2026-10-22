@@ -107,3 +107,15 @@ def bitacora(id_usuario: int | None = None, entidad: str | None = None, q: str =
 def usuarios_bitacora(conn=Depends(get_conn), _: UsuarioActual = Depends(requiere("bitacora.ver"))):
     return conn.execute("SELECT id_usuario, nombre FROM usuarios ORDER BY nombre").fetchall()
 
+
+@router.get("/comex/mercado")
+def mercado(anio: int | None = None, pais: str | None = None, categoria: str | None = None,
+            flujo: str | None = None, _: UsuarioActual = Depends(COMEX)):
+    from ..config import COMEX_ARCHIVO
+    from ..services.comercio_exterior import dashboard
+    try:
+        return dashboard(COMEX_ARCHIVO, anio, pais, categoria, flujo)
+    except FileNotFoundError:
+        raise HTTPException(404, "No se encontró el Excel de comercio exterior configurado.")
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))

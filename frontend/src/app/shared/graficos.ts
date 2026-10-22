@@ -3,6 +3,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { fmt } from './pipes';
 
 export interface Serie {
+  nombre?: string;
+  unidad?: string;
   valores: (number | null)[];
   color: string;
   discontinua?: boolean;
@@ -61,6 +63,9 @@ export class GraficoLineasComponent implements OnChanges {
         ultimo = i;
       });
       if (!d) continue;
+      s.valores.forEach((v, i) => {
+        if (v !== null && v !== undefined) g += `<circle tabindex="0" cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="5" style="fill:${s.color}"><title>${esc(s.nombre || this.descripcion)} - ${esc(this.etiquetas[i])}: ${esc(new Intl.NumberFormat('es-BO', {maximumFractionDigits: 2}).format(v))} ${esc(s.unidad || '')}</title></circle>`;
+      });
       if (s.area) g += `<path d="${d}L${x(ultimo).toFixed(1)} ${y(0)} L${x(primero).toFixed(1)} ${y(0)} Z" style="fill:${s.color};opacity:.08;stroke:none"/>`;
       g += `<path d="${d}" fill="none" style="stroke:${s.color}" stroke-width="${s.grosor || 2.5}" ${s.discontinua ? 'stroke-dasharray="4 5"' : ''} stroke-linecap="round" stroke-linejoin="round"/>`;
       if (s.punto && ultimo >= 0) g += `<circle cx="${x(ultimo).toFixed(1)}" cy="${y(s.valores[ultimo] as number).toFixed(1)}" r="4" style="fill:${s.color}"/>`;
